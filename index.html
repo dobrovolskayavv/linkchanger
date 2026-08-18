@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Преобразователь ссылок уроков</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+        }
+        body {
+            background: #f5f7fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 16px;
+        }
+        .card {
+            background: #ffffff;
+            max-width: 680px;
+            width: 100%;
+            border-radius: 28px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+            padding: 32px 28px;
+            transition: 0.2s;
+        }
+        h1 {
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 8px;
+            color: #0b1b32;
+            letter-spacing: -0.3px;
+        }
+        .sub {
+            color: #4a5b6e;
+            font-size: 0.95rem;
+            margin-bottom: 24px;
+            border-left: 4px solid #3b82f6;
+            padding-left: 16px;
+            background: #f0f4fe;
+            border-radius: 0 12px 12px 0;
+            line-height: 1.5;
+            padding: 12px 16px;
+        }
+        .sub strong {
+            color: #1e293b;
+        }
+        label {
+            display: block;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #1e293b;
+            margin-bottom: 6px;
+        }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+        .input-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .input-row input {
+            flex: 1;
+            min-width: 200px;
+            padding: 14px 18px;
+            border: 1.5px solid #dce1e9;
+            border-radius: 60px;
+            font-size: 1rem;
+            background: #ffffff;
+            transition: 0.2s;
+            outline: none;
+            color: #0b1b32;
+        }
+        .input-row input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+        }
+        .input-row input::placeholder {
+            color: #9aa9bb;
+            font-weight: 300;
+        }
+        .btn {
+            background: #3b82f6;
+            border: none;
+            color: white;
+            font-weight: 500;
+            padding: 14px 28px;
+            border-radius: 60px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.15s;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.2);
+            border: 1px solid transparent;
+        }
+        .btn:hover {
+            background: #2563eb;
+            transform: scale(0.97);
+            box-shadow: 0 6px 12px rgba(59, 130, 246, 0.25);
+        }
+        .btn:active {
+            background: #1d4ed8;
+        }
+        .btn-outline {
+            background: transparent;
+            color: #1e293b;
+            border: 1.5px solid #dce1e9;
+            box-shadow: none;
+            padding: 12px 24px;
+        }
+        .btn-outline:hover {
+            background: #f1f5f9;
+            border-color: #b0c0d0;
+            transform: none;
+            box-shadow: none;
+        }
+        .result-area {
+            background: #f8fafc;
+            border-radius: 20px;
+            padding: 16px 20px;
+            margin-top: 24px;
+            border: 1px solid #e9edf3;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+        .result-area .link {
+            font-size: 0.95rem;
+            word-break: break-all;
+            color: #0b1b32;
+            background: white;
+            padding: 8px 14px;
+            border-radius: 40px;
+            border: 1px solid #e2e8f0;
+            flex: 1;
+            min-width: 180px;
+            font-family: 'SF Mono', 'Menlo', 'Monaco', 'Cascadia Code', monospace;
+        }
+        .result-area .link.empty {
+            color: #8b9aae;
+            font-style: italic;
+            font-family: system-ui;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .btn-icon {
+            background: white;
+            border: 1px solid #dce1e9;
+            border-radius: 40px;
+            padding: 8px 18px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #1e293b;
+            cursor: pointer;
+            transition: 0.1s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+        .btn-icon:hover {
+            background: #f1f5f9;
+            border-color: #b8c6d6;
+        }
+        .btn-icon:active {
+            background: #e2e8f0;
+        }
+        .btn-icon.copy-success {
+            background: #d1fae5;
+            border-color: #34d399;
+            color: #065f46;
+        }
+        .toast {
+            font-size: 0.85rem;
+            color: #2563eb;
+            background: #e6f0ff;
+            padding: 6px 14px;
+            border-radius: 40px;
+            display: inline-block;
+            margin-top: 12px;
+        }
+        .examples {
+            margin-top: 18px;
+            background: #f1f5f9;
+            border-radius: 20px;
+            padding: 14px 18px;
+            font-size: 0.85rem;
+            color: #334155;
+        }
+        .examples span {
+            background: white;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            border: 1px solid #dce1e9;
+            display: inline-block;
+            margin: 4px 4px 4px 0;
+            word-break: break-all;
+        }
+        .examples .label {
+            background: transparent;
+            border: none;
+            padding-left: 0;
+            font-family: system-ui;
+            font-weight: 500;
+            color: #1e293b;
+        }
+        hr {
+            border: none;
+            border-top: 1px solid #e2e8f0;
+            margin: 18px 0 10px 0;
+        }
+        .footer-hint {
+            color: #64748b;
+            font-size: 0.8rem;
+            margin-top: 6px;
+        }
+        @media (max-width: 480px) {
+            .card { padding: 20px; }
+            .input-row { flex-direction: column; }
+            .btn { width: 100%; justify-content: center; }
+            .result-area { flex-direction: column; align-items: stretch; }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🔄 Преобразователь ссылок</h1>
+        <div class="sub">
+            <strong>Автор → Ученик</strong> · Вставьте ссылку из панели автора, 
+            получите ссылку для ученика с теми же <strong>lesson_id</strong> и <strong>course_id</strong>.
+        </div>
+
+        <div class="input-group">
+            <div class="input-row">
+                <input type="url" id="linkInput" placeholder="Вставьте ссылку автора (panel/lessons/preview...)" value="https://antitreningi.ru/panel/lessons/preview?lesson_id=7650611&course_id=251258">
+                <button class="btn" id="convertBtn">Преобразовать</button>
+            </div>
+        </div>
+
+        <!-- Результат -->
+        <div class="result-area" id="resultArea">
+            <span class="link empty" id="resultLink">Ссылка для ученика появится здесь</span>
+            <div class="action-buttons">
+                <button class="btn-icon" id="copyBtn" disabled>📋 Копировать</button>
+                <button class="btn-icon" id="resetBtn">✕ Очистить</button>
+            </div>
+        </div>
+        <div id="copyToast" class="toast" style="display: none;">✅ Скопировано!</div>
+
+        <!-- Примеры -->
+        <div class="examples">
+            <div><span class="label">📌 Пример ввода (автор):</span></div>
+            <span>https://antitreningi.ru/panel/lessons/preview?lesson_id=7650611&course_id=251258</span>
+            <div style="margin-top: 8px;"><span class="label">➜ Результат (ученик):</span></div>
+            <span>https://antitreningi.ru/student/lessons/lesson?course_id=251258&lesson_id=7650611</span>
+        </div>
+        <hr>
+        <div class="footer-hint">
+            🔍 Поддерживаются ссылки содержащие <strong>lesson_id</strong> и <strong>course_id</strong> в любом порядке.
+            Порядок в выходной ссылке: course_id → lesson_id.
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const linkInput = document.getElementById('linkInput');
+            const convertBtn = document.getElementById('convertBtn');
+            const resultLink = document.getElementById('resultLink');
+            const copyBtn = document.getElementById('copyBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const copyToast = document.getElementById('copyToast');
+            const resultArea = document.getElementById('resultArea');
+
+            // ---- вспомогательные ----
+            function extractIdsFromUrl(url) {
+                try {
+                    const urlObj = new URL(url);
+                    const params = new URLSearchParams(urlObj.search);
+                    let lessonId = params.get('lesson_id');
+                    let courseId = params.get('course_id');
+
+                    // если не нашли — возможно, параметры в другом регистре? но обычно так
+                    if (!lessonId || !courseId) {
+                        // пробуем найти через regex, если вдруг параметры не распарсились (например, из-за хеша)
+                        const matchLesson = url.match(/[?&]lesson_id=([^&]+)/);
+                        const matchCourse = url.match(/[?&]course_id=([^&]+)/);
+                        if (matchLesson) lessonId = matchLesson[1];
+                        if (matchCourse) courseId = matchCourse[1];
+                    }
+
+                    // проверяем, что оба id есть и не пустые
+                    if (lessonId && courseId && lessonId.trim() !== '' && courseId.trim() !== '') {
+                        return { lesson_id: lessonId.trim(), course_id: courseId.trim() };
+                    }
+                    return null;
+                } catch (_) {
+                    // если URL невалидный, пробуем regex напрямую
+                    const lessonMatch = url.match(/lesson_id=([^&]+)/);
+                    const courseMatch = url.match(/course_id=([^&]+)/);
+                    if (lessonMatch && courseMatch && lessonMatch[1] && courseMatch[1]) {
+                        return { lesson_id: lessonMatch[1].trim(), course_id: courseMatch[1].trim() };
+                    }
+                    return null;
+                }
+            }
+
+            function buildStudentLink(lessonId, courseId) {
+                return `https://antitreningi.ru/student/lessons/lesson?course_id=${encodeURIComponent(courseId)}&lesson_id=${encodeURIComponent(lessonId)}`;
+            }
+
+            function updateResult(link) {
+                if (link) {
+                    resultLink.textContent = link;
+                    resultLink.className = 'link';
+                    copyBtn.disabled = false;
+                } else {
+                    resultLink.textContent = 'Ссылка для ученика появится здесь';
+                    resultLink.className = 'link empty';
+                    copyBtn.disabled = true;
+                }
+                // скрыть тост при обновлении
+                copyToast.style.display = 'none';
+                copyToast.classList.remove('copy-success');
+            }
+
+            // ---- основная функция преобразования ----
+            function convertLink() {
+                const raw = linkInput.value.trim();
+                if (!raw) {
+                    updateResult(null);
+                    return;
+                }
+
+                const ids = extractIdsFromUrl(raw);
+                if (ids) {
+                    const studentLink = buildStudentLink(ids.lesson_id, ids.course_id);
+                    updateResult(studentLink);
+                } else {
+                    // Если не удалось найти оба id — показываем сообщение
+                    resultLink.textContent = '❌ Не удалось найти lesson_id и course_id';
+                    resultLink.className = 'link empty';
+                    copyBtn.disabled = true;
+                    copyToast.style.display = 'none';
+                }
+            }
+
+            // ---- обработчики ----
+            convertBtn.addEventListener('click', convertLink);
+
+            linkInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    convertLink();
+                }
+            });
+
+            // Копирование
+            copyBtn.addEventListener('click', async () => {
+                const textToCopy = resultLink.textContent;
+                if (!textToCopy || textToCopy.startsWith('❌') || textToCopy === 'Ссылка для ученика появится здесь') {
+                    return;
+                }
+                try {
+                    await navigator.clipboard.writeText(textToCopy);
+                    copyToast.textContent = '✅ Скопировано!';
+                    copyToast.style.display = 'inline-block';
+                    copyBtn.classList.add('copy-success');
+                    setTimeout(() => {
+                        copyToast.style.display = 'none';
+                        copyBtn.classList.remove('copy-success');
+                    }, 1800);
+                } catch (_) {
+                    // fallback
+                    const textArea = document.createElement('textarea');
+                    textArea.value = textToCopy;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    copyToast.textContent = '✅ Скопировано (fallback)';
+                    copyToast.style.display = 'inline-block';
+                    copyBtn.classList.add('copy-success');
+                    setTimeout(() => {
+                        copyToast.style.display = 'none';
+                        copyBtn.classList.remove('copy-success');
+                    }, 1800);
+                }
+            });
+
+            // Сброс / очистка
+            resetBtn.addEventListener('click', () => {
+                linkInput.value = '';
+                updateResult(null);
+                copyToast.style.display = 'none';
+                linkInput.focus();
+            });
+
+            // Инициализация: если поле не пустое при загрузке — сразу преобразовать
+            window.addEventListener('DOMContentLoaded', () => {
+                if (linkInput.value.trim() !== '') {
+                    convertLink();
+                }
+                // также добавим подсказку, что можно вставить
+            });
+
+            // Дополнительно: если пользователь вставил ссылку и кликнул вне поля — можно не преобразовывать автоматически
+            // но оставляем на усмотрение, по кнопке или Enter
+        })();
+    </script>
+</body>
+</html>
