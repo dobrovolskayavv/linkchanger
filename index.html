@@ -288,17 +288,17 @@
             const copyBtn = document.getElementById('copyBtn');
             const resetBtn = document.getElementById('resetBtn');
             const copyToast = document.getElementById('copyToast');
-            const resultArea = document.getElementById('resultArea');
 
-            // ---- извлечение course_id и lesson_id из пути /curator/courses/{id}/lessons/{id} ----
+            // ---- Извлечение course_id и lesson_id из пути URL ----
+            // Поддерживает форматы:
+            //   /curator/courses/251228/lessons/6000195
+            //   /student/courses/251228/lessons/6000195
             function extractIdsFromUrl(url) {
                 try {
-                    // Работаем с путём, игнорируя домен и query-параметры (на случай их наличия)
                     const urlObj = new URL(url);
                     const path = urlObj.pathname;
 
-                    // Ищем паттерн /curator/courses/{courseId}/lessons/{lessonId}
-                    // или /student/courses/{courseId}/lessons/{lessonId} (на случай, если вставят уже готовую)
+                    // Регулярное выражение: /(curator|student)/courses/{число}/lessons/{число}
                     const match = path.match(/\/(?:curator|student)\/courses\/(\d+)\/lessons\/(\d+)/);
 
                     if (match) {
@@ -339,7 +339,7 @@
                 copyToast.classList.remove('copy-success');
             }
 
-            // ---- основная функция преобразования ----
+            // ---- Основная функция преобразования ----
             function convertLink() {
                 const raw = linkInput.value.trim();
                 if (!raw) {
@@ -359,7 +359,7 @@
                 }
             }
 
-            // ---- обработчики ----
+            // ---- Обработчики ----
             convertBtn.addEventListener('click', convertLink);
 
             linkInput.addEventListener('keydown', (e) => {
@@ -409,7 +409,7 @@
                 linkInput.focus();
             });
 
-            // Инициализация: поле пустое, ничего не делаем
+            // Инициализация
             window.addEventListener('DOMContentLoaded', () => {
                 updateResult(null);
             });
