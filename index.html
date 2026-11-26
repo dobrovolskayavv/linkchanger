@@ -245,13 +245,13 @@
     <div class="card">
         <h1>🔄 Преобразователь ссылок</h1>
         <div class="sub">
-            <strong>Автор → Ученик</strong> · Вставьте ссылку из панели автора, 
-            получите ссылку для ученика с теми же <strong>lesson_id</strong> и <strong>course_id</strong>.
+            <strong>Куратор → Ученик</strong> · Вставьте ссылку из панели куратора, 
+            получите ссылку для ученика с теми же <strong>course_id</strong> и <strong>lesson_id</strong>.
         </div>
 
         <div class="input-group">
             <div class="input-row">
-               <input type="url" id="linkInput" placeholder="Вставьте ссылку автора (panel/lessons/preview...)" value="">
+                <input type="url" id="linkInput" placeholder="Вставьте ссылку куратора (curator/courses/.../lessons/...)" value="">
                 <button class="btn" id="convertBtn">Преобразовать</button>
             </div>
         </div>
@@ -268,15 +268,15 @@
 
         <!-- Примеры -->
         <div class="examples">
-            <div><span class="label">📌 Пример ввода (автор):</span></div>
-            <span>https://antitreningi.ru/panel/lessons/preview?lesson_id=7650611&course_id=251258</span>
+            <div><span class="label">📌 Пример ввода (куратор):</span></div>
+            <span>https://antitreningi.ru/curator/courses/251228/lessons/6000195</span>
             <div style="margin-top: 8px;"><span class="label">➜ Результат (ученик):</span></div>
-            <span>https://antitreningi.ru/student/lessons/lesson?course_id=251258&lesson_id=7650611</span>
+            <span>https://antitreningi.ru/student/courses/251228/lessons/6000195</span>
         </div>
         <hr>
         <div class="footer-hint">
-            🔍 Поддерживаются ссылки содержащие <strong>lesson_id</strong> и <strong>course_id</strong> в любом порядке.
-            Порядок в выходной ссылке: course_id → lesson_id.
+            🔍 Поддерживаются ссылки вида <strong>/curator/courses/{course_id}/lessons/{lesson_id}</strong>.
+            Результат: <strong>/student/courses/{course_id}/lessons/{lesson_id}</strong>.
         </div>
     </div>
 
@@ -290,41 +290,39 @@
             const copyToast = document.getElementById('copyToast');
             const resultArea = document.getElementById('resultArea');
 
-            // ---- вспомогательные ----
+            // ---- извлечение course_id и lesson_id из пути /curator/courses/{id}/lessons/{id} ----
             function extractIdsFromUrl(url) {
                 try {
+                    // Работаем с путём, игнорируя домен и query-параметры (на случай их наличия)
                     const urlObj = new URL(url);
-                    const params = new URLSearchParams(urlObj.search);
-                    let lessonId = params.get('lesson_id');
-                    let courseId = params.get('course_id');
+                    const path = urlObj.pathname;
 
-                    // если не нашли — возможно, параметры в другом регистре? но обычно так
-                    if (!lessonId || !courseId) {
-                        // пробуем найти через regex, если вдруг параметры не распарсились (например, из-за хеша)
-                        const matchLesson = url.match(/[?&]lesson_id=([^&]+)/);
-                        const matchCourse = url.match(/[?&]course_id=([^&]+)/);
-                        if (matchLesson) lessonId = matchLesson[1];
-                        if (matchCourse) courseId = matchCourse[1];
-                    }
+                    // Ищем паттерн /curator/courses/{courseId}/lessons/{lessonId}
+                    // или /student/courses/{courseId}/lessons/{lessonId} (на случай, если вставят уже готовую)
+                    const match = path.match(/\/(?:curator|student)\/courses\/(\d+)\/lessons\/(\d+)/);
 
-                    // проверяем, что оба id есть и не пустые
-                    if (lessonId && courseId && lessonId.trim() !== '' && courseId.trim() !== '') {
-                        return { lesson_id: lessonId.trim(), course_id: courseId.trim() };
+                    if (match) {
+                        return {
+                            course_id: match[1],
+                            lesson_id: match[2]
+                        };
                     }
                     return null;
                 } catch (_) {
-                    // если URL невалидный, пробуем regex напрямую
-                    const lessonMatch = url.match(/lesson_id=([^&]+)/);
-                    const courseMatch = url.match(/course_id=([^&]+)/);
-                    if (lessonMatch && courseMatch && lessonMatch[1] && courseMatch[1]) {
-                        return { lesson_id: lessonMatch[1].trim(), course_id: courseMatch[1].trim() };
+                    // Если URL невалидный, пробуем regex напрямую по строке
+                    const match = url.match(/\/(?:curator|student)\/courses\/(\d+)\/lessons\/(\d+)/);
+                    if (match) {
+                        return {
+                            course_id: match[1],
+                            lesson_id: match[2]
+                        };
                     }
                     return null;
                 }
             }
 
             function buildStudentLink(lessonId, courseId) {
-                return `https://antitreningi.ru/student/lessons/lesson?course_id=${encodeURIComponent(courseId)}&lesson_id=${encodeURIComponent(lessonId)}`;
+                return `https://antitreningi.ru/student/courses/${encodeURIComponent(courseId)}/lessons/${encodeURIComponent(lessonId)}`;
             }
 
             function updateResult(link) {
@@ -337,7 +335,6 @@
                     resultLink.className = 'link empty';
                     copyBtn.disabled = true;
                 }
-                // скрыть тост при обновлении
                 copyToast.style.display = 'none';
                 copyToast.classList.remove('copy-success');
             }
@@ -355,8 +352,7 @@
                     const studentLink = buildStudentLink(ids.lesson_id, ids.course_id);
                     updateResult(studentLink);
                 } else {
-                    // Если не удалось найти оба id — показываем сообщение
-                    resultLink.textContent = '❌ Не удалось найти lesson_id и course_id';
+                    resultLink.textContent = '❌ Не удалось найти course_id и lesson_id в ссылке';
                     resultLink.className = 'link empty';
                     copyBtn.disabled = true;
                     copyToast.style.display = 'none';
@@ -389,7 +385,6 @@
                         copyBtn.classList.remove('copy-success');
                     }, 1800);
                 } catch (_) {
-                    // fallback
                     const textArea = document.createElement('textarea');
                     textArea.value = textToCopy;
                     document.body.appendChild(textArea);
@@ -414,16 +409,10 @@
                 linkInput.focus();
             });
 
-            // Инициализация: если поле не пустое при загрузке — сразу преобразовать
+            // Инициализация: поле пустое, ничего не делаем
             window.addEventListener('DOMContentLoaded', () => {
-                if (linkInput.value.trim() !== '') {
-                    convertLink();
-                }
-                // также добавим подсказку, что можно вставить
+                updateResult(null);
             });
-
-            // Дополнительно: если пользователь вставил ссылку и кликнул вне поля — можно не преобразовывать автоматически
-            // но оставляем на усмотрение, по кнопке или Enter
         })();
     </script>
 </body>
